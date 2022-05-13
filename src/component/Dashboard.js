@@ -154,7 +154,7 @@ function DashboardContent() {
               noWrap
 
             >
-             { userData &&  userData.name}
+             {  currentUser &&  currentUser.email}
             </Typography>}
 
           { logoutLoader? <CircularProgress color="inherit" />:<Button onClick={logout}

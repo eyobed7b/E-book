@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
 
    return getDocs(usersCollectionRef).then(function (querySnapshot) {
       querySnapshot.forEach(function (doc) {
-        if (doc.data()['email'] == email) {
+        if (doc.data()['email'] === email) {
 
             setUserData(doc.data());
 
@@ -89,12 +89,12 @@ export function AuthProvider({ children }) {
       });
   }
   function login(email, password) {
-     
+
     const usersCollectionRef = collection(db, "users");
     return Auth.signInWithEmailAndPassword(email, password).then((user) => {
-        setCurrentUser(user);
 
-        // getUserFromCloud(email,user);
+
+        getUserFromCloud(email,user);
           getDocs(usersCollectionRef).then(function (querySnapshot) {
             querySnapshot.forEach(function (doc) {
               if (doc.data()['email'] === email) {
@@ -102,13 +102,14 @@ export function AuthProvider({ children }) {
                   setUserData(doc.data());
                   console.log("userData")
                   console.log(userData)
+                  setCurrentUser(user);
 
                setLoading(false);
               }
 
             });
 
-
+   return querySnapshot
         }).catch(function (error) {
             console.log("Error getting documents: ", error);
         });
@@ -134,9 +135,10 @@ export function AuthProvider({ children }) {
         setCurrentUser(user);
         // setUserVariableOnLocalStorage(user)
         //  console.log(user)
+        console.log(user)
       });
     unsubcribe();
-    setLoading(false);
+    //setLoading(false);
   }, []);
 
   return (
