@@ -3,7 +3,11 @@ import { Auth, db } from "../firebase";
 
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { useResolvedPath } from "react-router-dom";
+import {loadState,saveState} from "./LocalStorage"
+import Home from '../component/Home/Home'
+import Other from '../component/Other'
 const AuthContext = React.createContext();
+
 
 export function useAuth() {
   return useContext(AuthContext);
@@ -13,9 +17,14 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState();
   const [userData, setUserData] = useState();
   const [loading, setLoading] = useState(false);
+  const [drawer, setDrawerState] = useState('home')
   const value = {
     currentUser:  currentUser,
     userData:userData,
+    drawer:drawer,
+    setDrawer,
+
+    mainComponent,
     signup,
     login,
     signout,
@@ -76,12 +85,21 @@ export function AuthProvider({ children }) {
 
     // setUsers(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
   }
+  function setDrawer(name){
+    console.log(drawer)
+    return  setDrawerState(name)
 
+  }
+   function mainComponent( ){
+     if(drawer==="home") return <Home/>
+     else <Other/>
+   }
   function signout() {
     //    console.log("logout");
     return Auth.signOut()
       .then(() => {
         setCurrentUser(null);
+        saveState("user",  null);
         //   console.log("out");
       })
       .catch((error) => {
@@ -92,27 +110,30 @@ export function AuthProvider({ children }) {
 
     const usersCollectionRef = collection(db, "users");
     return Auth.signInWithEmailAndPassword(email, password).then((user) => {
+      setCurrentUser(user);
+      saveState('user',user)
+      loadState('user')
+
+  //       getUserFromCloud(email,user);
+  //         getDocs(usersCollectionRef).then(function (querySnapshot) {
+  //           setCurrentUser(user);
+  //           querySnapshot.forEach(function (doc) {
+  //             if (doc.data()['email'] === email) {
+
+  //                 setUserData(doc.data());
+  //                 console.log("userData")
+  //                 console.log(userData)
 
 
-        getUserFromCloud(email,user);
-          getDocs(usersCollectionRef).then(function (querySnapshot) {
-            querySnapshot.forEach(function (doc) {
-              if (doc.data()['email'] === email) {
+  //             // setLoading(false);
+  //             }
 
-                  setUserData(doc.data());
-                  console.log("userData")
-                  console.log(userData)
-                  setCurrentUser(user);
+  //           });
 
-               setLoading(false);
-              }
-
-            });
-
-   return querySnapshot
-        }).catch(function (error) {
-            console.log("Error getting documents: ", error);
-        });
+  //  return querySnapshot
+  //       }).catch(function (error) {
+  //           console.log("Error getting documents: ", error);
+  //       });
         console.log(userData);
         return user;
     });
@@ -138,7 +159,7 @@ export function AuthProvider({ children }) {
         console.log(user)
       });
     unsubcribe();
-    //setLoading(false);
+  setLoading(false);
   }, []);
 
   return (
